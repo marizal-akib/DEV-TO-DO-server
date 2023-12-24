@@ -48,6 +48,13 @@ async function run() {
       const result = await taskCollection.find().toArray();
       res.send(result);
     })
+
+    app.get('/task/:id', async (req, res) => {
+      const email = req.params.id
+      const query = {email : email }
+      const result = await taskCollection.find(query).toArray();
+      res.send(result);
+    })
     app.post('/task', async (req, res) => {
       const newTask = req.body
       const result = await taskCollection.insertOne(newTask);
@@ -60,12 +67,32 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/task/:id', async (req, res) => {
+    app.get('/tasks/:id', async (req, res) => {
       const id = req.params.id;
-      const query= {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await taskCollection.findOne(query);
       res.send(result);
-  })
+    })
+
+    app.patch('/tasks/:id', async (req, res) => {
+      const task = req.body
+      const id = req.params.id
+      const filter = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          deadline: task.deadline,
+          description: task.description,
+          project: task.project,
+          projectName: task.projectName,
+          project_description: task.project_description,
+          status: task.status,
+          title: task.title,
+          urgency: task.urgency,
+        }
+      }
+      const result = await taskCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
